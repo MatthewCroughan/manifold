@@ -1,0 +1,27 @@
+[package]
+name = "manifold"
+version = "0.4.1"
+edition = "2021"
+authors = ["Nova King <technobaboo@proton.me>"]
+description = "Take input from your 2D desktop and shove it into 3D!"
+license = "MIT"
+repository = "https://github.com/StardustXR/manifold/"
+homepage = "https://stardustxr.org"
+
+[dependencies]
+anyhow = "1.0.60"
+glam = { version = "0.22.0", features = ["mint"] }
+mint = "0.5.9"
+rustc-hash = "1.1.0"
+manifest-dir-macros = "0.1.16"
+parking_lot = "0.12.1"
+tokio = { version = "1.20.1", features = ["full"] }
+send_wrapper = "0.6.0"
+num = "0.4.0"
+raw-window-handle = "0.5.0"
+winit = { version = "0.27.4" }
+softbuffer = "0.1.1"
+xkbcommon = { version = "0.5.0", features = ["x11"] }
+xcb = "1.1.1"
+stardust-xr-molecules = "0.5.2"
+color-rs = "0.7.1"
