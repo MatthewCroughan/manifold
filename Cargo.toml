@@ -1,6 +1,6 @@
 [package]
 name = "manifold"
-version = "0.4.1"
+version = "0.1.0"
 edition = "2021"
 authors = ["Nova King <technobaboo@proton.me>"]
 description = "Take input from your 2D desktop and shove it into 3D!"
