@@ -15,26 +15,30 @@ pub trait Emittable {
 }
 
 #[allow(dead_code)]
-pub struct Emitter<T: Emittable> {
+pub struct Emitter<E: Emittable> {
 	field: BoxField,
 	grabbable: Grabbable,
 	model: Model,
-	pub contained: T,
+	pub contained: E,
 }
-impl<T: Emittable> Emitter<T> {
+impl<E: Emittable> Emitter<E> {
 	pub fn new<F>(spatial_parent: &Spatial, contain_fn: F) -> Self
 	where
-		F: FnOnce(&Spatial) -> T,
+		F: FnOnce(&Spatial) -> E,
 	{
 		let field = BoxField::builder()
 			.spatial_parent(spatial_parent)
-			.size(Vector3::from(T::SIZE))
+			.size(Vector3::from(E::SIZE))
 			.build()
 			.unwrap();
 		let grabbable = Grabbable::new(spatial_parent, &field).unwrap();
+		grabbable
+			.content_parent()
+			.set_position(None, Vector3::from(E::EMIT_POINT.map(|n| -n)))
+			.unwrap();
 		let model = Model::builder()
 			.spatial_parent(grabbable.content_parent())
-			.resource(&T::model_resource())
+			.resource(&E::model_resource())
 			.build()
 			.unwrap();
 		let contained = contain_fn(grabbable.content_parent());

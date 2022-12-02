@@ -4,8 +4,11 @@ use softbuffer::GraphicsContext;
 use stardust_xr_molecules::fusion::client::Client;
 use std::{mem::ManuallyDrop, sync::Arc};
 use winit::{
-	dpi::{LogicalPosition, Size},
-	event::{ElementState, Event, KeyboardInput, ModifiersState, VirtualKeyCode, WindowEvent},
+	dpi::{LogicalPosition, PhysicalPosition, Size},
+	event::{
+		ElementState, Event, KeyboardInput, ModifiersState, MouseButton, VirtualKeyCode,
+		WindowEvent,
+	},
 	event_loop::EventLoop,
 	platform::unix::WindowExtUnix,
 	window::{CursorGrabMode, Window, WindowBuilder},
@@ -114,9 +117,9 @@ impl InputWindow {
 
 	fn handle_window_event(&mut self, event: WindowEvent) {
 		match event {
-			// WindowEvent::MouseInput { state, button, .. } => self.handle_mouse_input(state, button),
+			WindowEvent::MouseInput { state, button, .. } => self.handle_mouse_input(state, button),
 			// WindowEvent::MouseWheel { delta, .. } => self.handle_axis(delta),
-			// WindowEvent::CursorMoved { position, .. } => self.handle_mouse_move(position),
+			WindowEvent::CursorMoved { position, .. } => self.handle_mouse_move(position),
 			WindowEvent::KeyboardInput { input, .. } => self.handle_keyboard_input(input),
 			WindowEvent::ModifiersChanged(state) => self.modifiers = state,
 			WindowEvent::CloseRequested => self.stardust_client.stop_loop(),
@@ -125,59 +128,59 @@ impl InputWindow {
 		}
 	}
 
-	// fn handle_mouse_move(&mut self, position: PhysicalPosition<f64>) {
-	// 	self.cursor_position = if self.grabbed {
-	// 		self.window().request_redraw();
-	// 		Some(position.to_logical::<u32>(self.window().scale_factor()))
-	// 	} else {
-	// 		None
-	// 	};
+	fn handle_mouse_move(&mut self, position: PhysicalPosition<f64>) {
+		self.cursor_position = if self.grabbed {
+			self.window().request_redraw();
+			Some(position.to_logical::<u32>(self.window().scale_factor()))
+		} else {
+			None
+		};
 
-	// 	if self.grabbed {
-	// 		let window_size = self.window().inner_size();
-	// 		let cursor_position = position.to_logical::<f64>(self.window().scale_factor());
-	// 		let center_position = LogicalPosition::new(
-	// 			window_size.width as f64 / 2.0,
-	// 			window_size.height as f64 / 2.0,
-	// 		);
-	// 		let cursor_delta = Vector2::from_slice(&[
-	// 			(cursor_position.x - center_position.x) as f32,
-	// 			(cursor_position.y - center_position.y) as f32,
-	// 		]);
+		if self.grabbed {
+			let window_size = self.window().inner_size();
+			// let cursor_position = position.to_logical::<f64>(self.window().scale_factor());
+			let center_position = LogicalPosition::new(
+				window_size.width as f64 / 2.0,
+				window_size.height as f64 / 2.0,
+			);
+			// let cursor_delta = Vector2::from_slice(&[
+			// 	(cursor_position.x - center_position.x) as f32,
+			// 	(cursor_position.y - center_position.y) as f32,
+			// ]);
 
-	// if let Some(focused) = self.flatland.lock().focused.clone().upgrade() {
-	// 	focused.lock().pointer_delta(cursor_delta);
-	// }
+			// if let Some(focused) = self.flatland.lock().focused.clone().upgrade() {
+			// 	focused.lock().pointer_delta(cursor_delta);
+			// }
 
-	// 		self.window().set_cursor_position(center_position).unwrap();
-	// 	}
-	// }
+			self.window().set_cursor_position(center_position).unwrap();
+		}
+	}
 
-	// fn handle_mouse_input(&mut self, state: ElementState, button: MouseButton) {
-	// 	if !self.grabbed {
-	// 		if state == ElementState::Released && button == MouseButton::Left {
-	// 			self.set_grab(true);
-	// 		}
-	// 	} else {
-	// self.flatland.lock().with_focused(|item| {
-	// 	item.pointer_button(
-	// 		match button {
-	// 			MouseButton::Left => input_event_codes::BTN_LEFT!(),
-	// 			MouseButton::Right => input_event_codes::BTN_RIGHT!(),
-	// 			MouseButton::Middle => input_event_codes::BTN_MIDDLE!(),
-	// 			MouseButton::Other(_) => {
-	// 				return;
-	// 			}
-	// 		},
-	// 		match state {
-	// 			ElementState::Released => 0,
-	// 			ElementState::Pressed => 1,
-	// 		},
-	// 	)
-	// 	.unwrap();
-	// });
-	// }
-	// }
+	fn handle_mouse_input(&mut self, state: ElementState, button: MouseButton) {
+		if !self.grabbed {
+			if state == ElementState::Released && button == MouseButton::Left {
+				self.set_grab(true);
+			}
+		} else {
+			// self.flatland.lock().with_focused(|item| {
+			// 	item.pointer_button(
+			// 		match button {
+			// 			MouseButton::Left => input_event_codes::BTN_LEFT!(),
+			// 			MouseButton::Right => input_event_codes::BTN_RIGHT!(),
+			// 			MouseButton::Middle => input_event_codes::BTN_MIDDLE!(),
+			// 			MouseButton::Other(_) => {
+			// 				return;
+			// 			}
+			// 		},
+			// 		match state {
+			// 			ElementState::Released => 0,
+			// 			ElementState::Pressed => 1,
+			// 		},
+			// 	)
+			// 	.unwrap();
+			// });
+		}
+	}
 
 	// fn handle_axis(&mut self, delta: MouseScrollDelta) {
 	// 	if self.grabbed {
