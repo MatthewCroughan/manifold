@@ -1,13 +1,14 @@
-use crate::keyboard::Keyboard;
-use anyhow::Result;
+use crate::{keyboard::Keyboard, mouse::Mouse};
+use color_eyre::eyre::Result;
+use mint::Vector2;
 use softbuffer::GraphicsContext;
 use stardust_xr_molecules::fusion::client::Client;
 use std::{mem::ManuallyDrop, sync::Arc};
 use winit::{
 	dpi::{LogicalPosition, PhysicalPosition, Size},
 	event::{
-		ElementState, Event, KeyboardInput, ModifiersState, MouseButton, VirtualKeyCode,
-		WindowEvent,
+		ElementState, Event, KeyboardInput, ModifiersState, MouseButton, MouseScrollDelta,
+		VirtualKeyCode, WindowEvent,
 	},
 	event_loop::EventLoop,
 	platform::unix::WindowExtUnix,
@@ -24,6 +25,7 @@ const RADIUS: u32 = 8;
 pub struct InputWindow {
 	stardust_client: Arc<Client>,
 	keyboard: Keyboard,
+	mouse: Mouse,
 	graphics_context: GraphicsContext<Window>,
 	cursor_position: Option<LogicalPosition<u32>>,
 	grabbed: bool,
@@ -34,6 +36,7 @@ impl InputWindow {
 		event_loop: &EventLoop<()>,
 		stardust_client: Arc<Client>,
 		keyboard: Keyboard,
+		mouse: Mouse,
 	) -> Result<Self> {
 		let size = Size::Logical([512, 512].into());
 		let window = WindowBuilder::new()
@@ -68,6 +71,7 @@ impl InputWindow {
 		let mut input_window = InputWindow {
 			stardust_client,
 			keyboard,
+			mouse,
 			graphics_context,
 			cursor_position: None,
 			grabbed: true,
@@ -118,7 +122,7 @@ impl InputWindow {
 	fn handle_window_event(&mut self, event: WindowEvent) {
 		match event {
 			WindowEvent::MouseInput { state, button, .. } => self.handle_mouse_input(state, button),
-			// WindowEvent::MouseWheel { delta, .. } => self.handle_axis(delta),
+			WindowEvent::MouseWheel { delta, .. } => self.handle_axis(delta),
 			WindowEvent::CursorMoved { position, .. } => self.handle_mouse_move(position),
 			WindowEvent::KeyboardInput { input, .. } => self.handle_keyboard_input(input),
 			WindowEvent::ModifiersChanged(state) => self.modifiers = state,
@@ -138,19 +142,19 @@ impl InputWindow {
 
 		if self.grabbed {
 			let window_size = self.window().inner_size();
-			// let cursor_position = position.to_logical::<f64>(self.window().scale_factor());
+			let cursor_position = position.to_logical::<f64>(self.window().scale_factor());
 			let center_position = LogicalPosition::new(
 				window_size.width as f64 / 2.0,
 				window_size.height as f64 / 2.0,
 			);
-			// let cursor_delta = Vector2::from_slice(&[
-			// 	(cursor_position.x - center_position.x) as f32,
-			// 	(cursor_position.y - center_position.y) as f32,
-			// ]);
+			let cursor_delta = Vector2::from_slice(&[
+				(cursor_position.x - center_position.x) as f32,
+				(cursor_position.y - center_position.y) as f32,
+			]);
 
-			// if let Some(focused) = self.flatland.lock().focused.clone().upgrade() {
-			// 	focused.lock().pointer_delta(cursor_delta);
-			// }
+			self.mouse
+				.lock()
+				.send_event(Some(cursor_delta), None, None, None, None);
 
 			self.window().set_cursor_position(center_position).unwrap();
 		}
@@ -162,43 +166,40 @@ impl InputWindow {
 				self.set_grab(true);
 			}
 		} else {
-			// self.flatland.lock().with_focused(|item| {
-			// 	item.pointer_button(
-			// 		match button {
-			// 			MouseButton::Left => input_event_codes::BTN_LEFT!(),
-			// 			MouseButton::Right => input_event_codes::BTN_RIGHT!(),
-			// 			MouseButton::Middle => input_event_codes::BTN_MIDDLE!(),
-			// 			MouseButton::Other(_) => {
-			// 				return;
-			// 			}
-			// 		},
-			// 		match state {
-			// 			ElementState::Released => 0,
-			// 			ElementState::Pressed => 1,
-			// 		},
-			// 	)
-			// 	.unwrap();
-			// });
+			let button = match button {
+				MouseButton::Left => input_event_codes::BTN_LEFT!(),
+				MouseButton::Right => input_event_codes::BTN_RIGHT!(),
+				MouseButton::Middle => input_event_codes::BTN_MIDDLE!(),
+				MouseButton::Other(_) => {
+					return;
+				}
+			};
+			let (buttons_up, buttons_down) = match state {
+				ElementState::Pressed => (None, Some(vec![button])),
+				ElementState::Released => (Some(vec![button]), None),
+			};
+			self.mouse
+				.lock()
+				.send_event(None, None, None, buttons_up, buttons_down);
 		}
 	}
 
-	// fn handle_axis(&mut self, delta: MouseScrollDelta) {
-	// 	if self.grabbed {
-	// self.flatland.lock().with_focused(|item| {
-	// 	let (scroll_distance, scroll_steps) = match delta {
-	// 		MouseScrollDelta::LineDelta(right, down) => {
-	// 			(Vector2::from([0.0, 0.0]), Vector2::from([-right, -down]))
-	// 		}
-	// 		MouseScrollDelta::PixelDelta(offset) => (
-	// 			Vector2::from([-offset.x as f32, -offset.y as f32]),
-	// 			Vector2::from([0.0, 0.0]),
-	// 		),
-	// 	};
-
-	// 	item.pointer_scroll(scroll_distance, scroll_steps).unwrap();
-	// });
-	// 	}
-	// }
+	fn handle_axis(&mut self, delta: MouseScrollDelta) {
+		if self.grabbed {
+			let (scroll_distance, scroll_steps) = match delta {
+				MouseScrollDelta::LineDelta(right, down) => {
+					(None, Some(Vector2::from([-right, -down])))
+				}
+				MouseScrollDelta::PixelDelta(offset) => (
+					Some(Vector2::from([-offset.x as f32, -offset.y as f32])),
+					None,
+				),
+			};
+			self.mouse
+				.lock()
+				.send_event(None, scroll_distance, scroll_steps, None, None);
+		}
+	}
 
 	fn handle_keyboard_input(&mut self, input: KeyboardInput) {
 		if input.virtual_keycode == Some(VirtualKeyCode::Escape)
@@ -207,10 +208,6 @@ impl InputWindow {
 		{
 			self.set_grab(false);
 		} else {
-			// self.flatland.lock().with_focused(|item| {
-			// 	item.keyboard_key_state(input.scancode, input.state == ElementState::Pressed)
-			// 		.unwrap();
-			// });
 			self.keyboard
 				.lock()
 				.send_key(input.scancode, input.state == ElementState::Pressed);
