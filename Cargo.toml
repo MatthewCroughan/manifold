@@ -8,6 +8,9 @@ license = "MIT"
 repository = "https://github.com/StardustXR/manifold/"
 homepage = "https://stardustxr.org"
 
+[profile.dev]
+opt-level = 3
+
 [dependencies]
 glam = { version = "0.22.0", features = ["mint"] }
 mint = "0.5.9"
@@ -22,7 +25,7 @@ winit = { version = "0.27.4" }
 softbuffer = "0.1.1"
 xkbcommon = { version = "0.5.0", features = ["x11"] }
 xcb = "1.1.1"
-stardust-xr-molecules = "0.7.0"
+stardust-xr-molecules = "0.7.4"
 color-rs = "0.7.1"
 color-eyre = { version = "0.6.2", default-features = false }
 input-event-codes = "5.16.8"
