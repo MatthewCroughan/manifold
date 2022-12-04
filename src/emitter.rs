@@ -31,7 +31,7 @@ impl<E: Emittable> Emitter<E> {
 			.size(Vector3::from(E::SIZE))
 			.build()
 			.unwrap();
-		let grabbable = Grabbable::new(spatial_parent, &field).unwrap();
+		let grabbable = Grabbable::new(spatial_parent, &field, 0.1).unwrap();
 		grabbable
 			.content_parent()
 			.set_position(None, Vector3::from(E::EMIT_POINT.map(|n| -n)))
