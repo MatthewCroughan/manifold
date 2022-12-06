@@ -1,12 +1,16 @@
 [package]
 name = "stardust-xr-manifold"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Nova King <technobaboo@proton.me>"]
 description = "Take input from your 2D desktop and shove it into 3D!"
 license = "MIT"
 repository = "https://github.com/StardustXR/manifold/"
 homepage = "https://stardustxr.org"
+
+[[bin]]
+name = "manifold"
+path = "src/main.rs"
 
 [profile.dev]
 opt-level = 3
