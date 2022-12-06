@@ -47,7 +47,7 @@ impl Emittable for Keyboard {
 	fn model_resource() -> NamespacedResource {
 		NamespacedResource {
 			namespace: "manifold".to_string(),
-			path: "keyboard.glb".to_string(),
+			path: "keyboard".to_string(),
 		}
 	}
 	fn update(&mut self, info: LogicStepInfo) {

@@ -45,7 +45,7 @@ impl Emittable for Mouse {
 	fn model_resource() -> NamespacedResource {
 		NamespacedResource {
 			namespace: "manifold".to_string(),
-			path: "mouse.glb".to_string(),
+			path: "mouse".to_string(),
 		}
 	}
 	fn update(&mut self, info: LogicStepInfo) {
