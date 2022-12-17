@@ -5,6 +5,7 @@ use rustc_hash::FxHashMap;
 use stardust_xr_molecules::{
 	fusion::{
 		client::LogicStepInfo,
+		core::values::Transform,
 		data::{NewReceiverInfo, PulseReceiver, PulseSender, PulseSenderHandler},
 		drawable::{LinePoint, Lines},
 		fields::UnknownField,
@@ -28,9 +29,11 @@ impl Keyboard {
 	pub fn create(spatial_parent: &Spatial) -> Self {
 		let pulse_sender = PulseSender::create(
 			spatial_parent,
-			Some(Vector3::from(Self::EMIT_POINT)),
-			None,
-			KEYBOARD_MASK.clone(),
+			Transform {
+				position: Vector3::from(Self::EMIT_POINT),
+				..Default::default()
+			},
+			&KEYBOARD_MASK,
 		)
 		.unwrap();
 		let keyboard_handler = KeyboardHandler::new(pulse_sender.alias());
@@ -41,8 +44,16 @@ impl Keyboard {
 	}
 }
 impl Emittable for Keyboard {
-	const SIZE: [f32; 3] = [0.05, 0.03, 0.004];
-	const EMIT_POINT: [f32; 3] = [0.0, 0.017667, 0.0];
+	const SIZE: Vector3<f32> = Vector3 {
+		x: 0.05,
+		y: 0.03,
+		z: 0.004,
+	};
+	const EMIT_POINT: Vector3<f32> = Vector3 {
+		x: 0.0,
+		y: 0.017667,
+		z: 0.0,
+	};
 
 	fn model_resource() -> NamespacedResource {
 		NamespacedResource {
@@ -151,12 +162,7 @@ impl KeyboardReceiverInfo {
 	}
 	fn connect(&mut self, sender: &PulseSender, keymap: Option<&Keymap>) {
 		self.lines = Some(Arc::new(
-			Lines::builder()
-				.spatial_parent(&self.receiver.spatial)
-				.points(&[])
-				.cyclic(false)
-				.build()
-				.unwrap(),
+			Lines::create(&self.receiver, Transform::default(), &[], false).unwrap(),
 		));
 		if keymap.is_some() {
 			let keymap_event = KeyboardEvent::new(keymap, None, None);
@@ -166,7 +172,7 @@ impl KeyboardReceiverInfo {
 	const LINE_THICKNESS: f32 = 0.005;
 	fn update_sender(&mut self, sender: &PulseSender) {
 		if let Some(lines) = self.lines.clone() {
-			let future = sender.get_translation_rotation_scale(&lines).unwrap();
+			let future = sender.get_position_rotation_scale(&lines).unwrap();
 			tokio::task::spawn(async move {
 				if let Ok((position, _, _)) = future.await {
 					lines
