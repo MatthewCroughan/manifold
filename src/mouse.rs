@@ -27,10 +27,7 @@ impl Mouse {
 	pub fn create(spatial_parent: &Spatial) -> Self {
 		let pulse_sender = PulseSender::create(
 			spatial_parent,
-			Transform {
-				position: Vector3::from(Self::EMIT_POINT),
-				..Default::default()
-			},
+			Transform::from_position(Self::EMIT_POINT),
 			&MOUSE_MASK,
 		)
 		.unwrap();
@@ -42,16 +39,8 @@ impl Mouse {
 	}
 }
 impl Emittable for Mouse {
-	const SIZE: Vector3<f32> = Vector3 {
-		x: 0.018,
-		y: 0.027379,
-		z: 0.004,
-	};
-	const EMIT_POINT: Vector3<f32> = Vector3 {
-		x: 0.0,
-		y: 0.017667,
-		z: 0.0,
-	};
+	const SIZE: [f32; 3] = [0.018, 0.027379, 0.004];
+	const EMIT_POINT: [f32; 3] = [0.0, 0.017667, 0.0];
 
 	fn model_resource() -> NamespacedResource {
 		NamespacedResource {

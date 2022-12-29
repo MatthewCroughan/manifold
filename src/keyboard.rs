@@ -29,10 +29,7 @@ impl Keyboard {
 	pub fn create(spatial_parent: &Spatial) -> Self {
 		let pulse_sender = PulseSender::create(
 			spatial_parent,
-			Transform {
-				position: Vector3::from(Self::EMIT_POINT),
-				..Default::default()
-			},
+			Transform::from_position(Self::EMIT_POINT),
 			&KEYBOARD_MASK,
 		)
 		.unwrap();
@@ -44,16 +41,8 @@ impl Keyboard {
 	}
 }
 impl Emittable for Keyboard {
-	const SIZE: Vector3<f32> = Vector3 {
-		x: 0.05,
-		y: 0.03,
-		z: 0.004,
-	};
-	const EMIT_POINT: Vector3<f32> = Vector3 {
-		x: 0.0,
-		y: 0.017667,
-		z: 0.0,
-	};
+	const SIZE: [f32; 3] = [0.05, 0.03, 0.004];
+	const EMIT_POINT: [f32; 3] = [0.0, 0.017667, 0.0];
 
 	fn model_resource() -> NamespacedResource {
 		NamespacedResource {

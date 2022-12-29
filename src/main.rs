@@ -3,7 +3,7 @@ use input_window::InputWindow;
 #[cfg(feature = "dev")]
 use manifest_dir_macros::directory_relative_path;
 use manifold::Manifold;
-use stardust_xr_molecules::fusion::client::Client;
+use stardust_xr_molecules::{fusion::client::Client, resources};
 use std::thread;
 use tokio::{runtime::Handle, sync::oneshot};
 use winit::{event_loop::EventLoopBuilder, platform::unix::EventLoopBuilderExtUnix};
@@ -18,20 +18,7 @@ pub mod mouse;
 async fn main() -> Result<()> {
 	color_eyre::install()?;
 	let (client, stardust_event_loop) = Client::connect_with_async_loop().await?;
-	#[cfg(feature = "dev")]
-	let mut dirs = vec![directory_relative_path!("res").to_string()];
-	#[cfg(not(feature = "dev"))]
-	let mut dirs = vec![];
-	if let Ok(home) = std::env::var("HOME") {
-		dirs.push(home + "/.local/share");
-	}
-	if let Ok(data_dir) = std::env::var("XDG_DATA_DIRS") {
-		for dir in data_dir.split(':') {
-			dirs.push(dir.to_string());
-		}
-	}
-	dbg!(&dirs);
-	client.set_base_prefixes(&dirs);
+	resources::set_base_prefixes(&client);
 
 	let tokio_handle = Handle::current();
 	let manifold = client.wrap_root(Manifold::new(&client));
