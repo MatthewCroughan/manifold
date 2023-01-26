@@ -4,13 +4,12 @@ use parking_lot::MutexGuard;
 use rustc_hash::FxHashMap;
 use stardust_xr_molecules::{
 	fusion::{
-		client::LogicStepInfo,
+		client::FrameInfo,
 		core::values::Transform,
 		data::{NewReceiverInfo, PulseReceiver, PulseSender, PulseSenderHandler},
-		drawable::{LinePoint, Lines},
+		drawable::{LinePoint, Lines, ResourceID},
 		fields::UnknownField,
 		node::NodeType,
-		resource::NamespacedResource,
 		spatial::Spatial,
 		HandlerWrapper,
 	},
@@ -44,14 +43,11 @@ impl Emittable for Keyboard {
 	const SIZE: [f32; 3] = [0.05, 0.03, 0.004];
 	const EMIT_POINT: [f32; 3] = [0.0, 0.017667, 0.0];
 
-	fn model_resource() -> NamespacedResource {
-		NamespacedResource {
-			namespace: "manifold".to_string(),
-			path: "keyboard".to_string(),
-		}
+	fn model_resource() -> ResourceID {
+		ResourceID::new_namespaced("manifold", "keyboard")
 	}
-	fn update(&mut self, info: LogicStepInfo) {
-		self.lock().logic_step(info);
+	fn update(&mut self, info: FrameInfo) {
+		self.lock().frame(info);
 	}
 }
 
@@ -68,7 +64,7 @@ impl KeyboardHandler {
 			keymap: None,
 		}
 	}
-	pub fn logic_step(&mut self, _info: LogicStepInfo) {
+	pub fn frame(&mut self, _info: FrameInfo) {
 		for receiver_info in self.receivers_info.values_mut() {
 			receiver_info.update_sender(&self.pulse_sender);
 		}

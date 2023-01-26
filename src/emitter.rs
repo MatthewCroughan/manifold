@@ -1,8 +1,11 @@
 use mint::Vector3;
 use stardust_xr_molecules::{
 	fusion::{
-		client::LogicStepInfo, core::values::Transform, drawable::Model, fields::BoxField,
-		resource::NamespacedResource, spatial::Spatial,
+		client::FrameInfo,
+		core::values::Transform,
+		drawable::{Model, ResourceID},
+		fields::BoxField,
+		spatial::Spatial,
 	},
 	GrabData, Grabbable,
 };
@@ -10,8 +13,8 @@ use stardust_xr_molecules::{
 pub trait Emittable {
 	const SIZE: [f32; 3];
 	const EMIT_POINT: [f32; 3];
-	fn model_resource() -> NamespacedResource;
-	fn update(&mut self, info: LogicStepInfo);
+	fn model_resource() -> ResourceID;
+	fn update(&mut self, info: FrameInfo);
 }
 
 #[allow(dead_code)]
@@ -57,7 +60,7 @@ impl<E: Emittable> Emitter<E> {
 		}
 	}
 
-	pub fn logic_step(&mut self, info: LogicStepInfo) {
+	pub fn frame(&mut self, info: FrameInfo) {
 		self.grabbable.update();
 		self.contained.update(info);
 	}

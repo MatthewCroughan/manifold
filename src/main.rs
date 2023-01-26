@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
 	resources::set_base_prefixes(&client);
 
 	let tokio_handle = Handle::current();
-	let manifold = client.wrap_root(Manifold::new(&client));
+	let manifold = client.wrap_root(Manifold::new(&client))?;
 	let (winit_stop_tx, mut winit_stop_rx) = oneshot::channel::<()>();
 	let winit_thread = thread::Builder::new().name("winit".to_owned()).spawn({
 		let client = client.clone();

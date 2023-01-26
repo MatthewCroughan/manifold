@@ -1,5 +1,5 @@
 use crate::{emitter::Emitter, keyboard::Keyboard, mouse::Mouse};
-use stardust_xr_molecules::fusion::client::{Client, LifeCycleHandler, LogicStepInfo};
+use stardust_xr_molecules::fusion::client::{Client, FrameInfo, RootHandler};
 
 pub struct Manifold {
 	keyboard: Emitter<Keyboard>,
@@ -18,9 +18,9 @@ impl Manifold {
 		self.mouse.contained.clone()
 	}
 }
-impl LifeCycleHandler for Manifold {
-	fn logic_step(&mut self, info: LogicStepInfo) {
-		self.mouse.logic_step(info);
-		self.keyboard.logic_step(info);
+impl RootHandler for Manifold {
+	fn frame(&mut self, info: FrameInfo) {
+		self.mouse.frame(info);
+		self.keyboard.frame(info);
 	}
 }

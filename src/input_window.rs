@@ -26,7 +26,8 @@ pub struct InputWindow {
 	stardust_client: Arc<Client>,
 	keyboard: Keyboard,
 	mouse: Mouse,
-	graphics_context: GraphicsContext<Window>,
+	window: Window,
+	graphics_context: GraphicsContext,
 	cursor_position: Option<LogicalPosition<u32>>,
 	grabbed: bool,
 	modifiers: ModifiersState,
@@ -66,12 +67,13 @@ impl InputWindow {
 		};
 		keyboard.lock().set_keymap(keymap);
 
-		let graphics_context = unsafe { GraphicsContext::new(window) }.unwrap();
+		let graphics_context = unsafe { GraphicsContext::new(&window, &window) }.unwrap();
 
 		let mut input_window = InputWindow {
 			stardust_client,
 			keyboard,
 			mouse,
+			window,
 			graphics_context,
 			cursor_position: None,
 			grabbed: true,
@@ -82,15 +84,11 @@ impl InputWindow {
 		Ok(input_window)
 	}
 
-	fn window(&mut self) -> &mut Window {
-		self.graphics_context.window_mut()
-	}
-
 	pub fn handle_event(&mut self, event: Event<()>) {
 		match event {
 			Event::WindowEvent { event, .. } => self.handle_window_event(event),
 			Event::RedrawRequested(_window_id) => {
-				let window_size = self.window().inner_size();
+				let window_size = self.window.inner_size();
 				let buffer_len = window_size.width * window_size.height;
 				let mut buffer = vec![0; buffer_len as usize];
 				if let Some(mouse_position) = self.cursor_position {
@@ -134,15 +132,15 @@ impl InputWindow {
 
 	fn handle_mouse_move(&mut self, position: PhysicalPosition<f64>) {
 		self.cursor_position = if self.grabbed {
-			self.window().request_redraw();
-			Some(position.to_logical::<u32>(self.window().scale_factor()))
+			self.window.request_redraw();
+			Some(position.to_logical::<u32>(self.window.scale_factor()))
 		} else {
 			None
 		};
 
 		if self.grabbed {
-			let window_size = self.window().inner_size();
-			let cursor_position = position.to_logical::<f64>(self.window().scale_factor());
+			let window_size = self.window.inner_size();
+			let cursor_position = position.to_logical::<f64>(self.window.scale_factor());
 			let center_position = LogicalPosition::new(
 				window_size.width as f64 / 2.0,
 				window_size.height as f64 / 2.0,
@@ -156,7 +154,7 @@ impl InputWindow {
 				.lock()
 				.send_event(Some(cursor_delta), None, None, None, None);
 
-			self.window().set_cursor_position(center_position).unwrap();
+			self.window.set_cursor_position(center_position).unwrap();
 		}
 	}
 
@@ -222,16 +220,13 @@ impl InputWindow {
 		}
 		self.grabbed = grab;
 
-		self.window().set_cursor_visible(!grab);
+		self.window.set_cursor_visible(!grab);
 		if grab {
-			let window_size = self.window().inner_size();
+			let window_size = self.window.inner_size();
 			let center_position =
 				LogicalPosition::new(window_size.width / 2, window_size.height / 2);
-			self.window().set_cursor_position(center_position).unwrap();
-		// self.flatland.lock().with_focused(|item| {
-		// 	let keymap = self.keymap.get_as_string(KEYMAP_FORMAT_TEXT_V1);
-		// 	item.keyboard_activate(&keymap).unwrap();
-		// });
+			self.window.set_cursor_position(center_position).unwrap();
+		// self.keyboard.lock().
 		} else {
 			// self.flatland.lock().with_focused(|item| {
 			// 	item.keyboard_deactivate().unwrap();
@@ -249,8 +244,8 @@ impl InputWindow {
 			CursorGrabMode::None
 		};
 
-		if self.window().set_cursor_grab(grab).is_ok() {
-			self.window().set_title(window_title);
+		if self.window.set_cursor_grab(grab).is_ok() {
+			self.window.set_title(window_title);
 		}
 	}
 }
