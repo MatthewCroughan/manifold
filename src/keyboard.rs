@@ -2,19 +2,17 @@ use color::{rgba, Rgba};
 use mint::Vector3;
 use parking_lot::MutexGuard;
 use rustc_hash::FxHashMap;
-use stardust_xr_molecules::{
-	fusion::{
-		client::FrameInfo,
-		core::values::Transform,
-		data::{NewReceiverInfo, PulseReceiver, PulseSender, PulseSenderHandler},
-		drawable::{LinePoint, Lines, ResourceID},
-		fields::UnknownField,
-		node::NodeType,
-		spatial::Spatial,
-		HandlerWrapper,
-	},
-	keyboard::{xkb::State, KeyboardEvent, KEYBOARD_MASK},
+use stardust_xr_fusion::{
+	client::FrameInfo,
+	core::values::Transform,
+	data::{NewReceiverInfo, PulseReceiver, PulseSender, PulseSenderHandler},
+	drawable::{LinePoint, Lines, ResourceID},
+	fields::UnknownField,
+	node::NodeType,
+	spatial::Spatial,
+	HandlerWrapper,
 };
+use stardust_xr_molecules::keyboard::{xkb::State, KeyboardEvent, KEYBOARD_MASK};
 use std::sync::Arc;
 use xkbcommon::xkb::Keymap;
 

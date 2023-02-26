@@ -3,10 +3,11 @@ use input_window::InputWindow;
 #[cfg(feature = "dev")]
 use manifest_dir_macros::directory_relative_path;
 use manifold::Manifold;
-use stardust_xr_molecules::{fusion::client::Client, resources};
+use stardust_xr_fusion::client::Client;
+use stardust_xr_molecules::resources;
 use std::thread;
 use tokio::{runtime::Handle, sync::oneshot};
-use winit::{event_loop::EventLoopBuilder, platform::unix::EventLoopBuilderExtUnix};
+use winit::{event_loop::EventLoopBuilder, platform::x11::EventLoopBuilderExtX11};
 
 pub mod emitter;
 pub mod input_window;

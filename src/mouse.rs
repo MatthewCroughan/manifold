@@ -3,19 +3,17 @@ use color::{rgba, Rgba};
 use mint::{Vector2, Vector3};
 use parking_lot::MutexGuard;
 use rustc_hash::FxHashMap;
-use stardust_xr_molecules::{
-	fusion::{
-		client::FrameInfo,
-		core::values::Transform,
-		data::{NewReceiverInfo, PulseReceiver, PulseSender, PulseSenderHandler},
-		drawable::{LinePoint, Lines, ResourceID},
-		fields::UnknownField,
-		node::NodeType,
-		spatial::Spatial,
-		HandlerWrapper,
-	},
-	mouse::{MouseEvent, MOUSE_MASK},
+use stardust_xr_fusion::{
+	client::FrameInfo,
+	core::values::Transform,
+	data::{NewReceiverInfo, PulseReceiver, PulseSender, PulseSenderHandler},
+	drawable::{LinePoint, Lines, ResourceID},
+	fields::UnknownField,
+	node::NodeType,
+	spatial::Spatial,
+	HandlerWrapper,
 };
+use stardust_xr_molecules::mouse::{MouseEvent, MOUSE_MASK};
 use std::sync::Arc;
 
 static MOUSE_COLOR: Rgba<f32> = rgba!(0.141, 0.886, 0.521, 1.0);

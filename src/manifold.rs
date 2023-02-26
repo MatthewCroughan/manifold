@@ -1,5 +1,5 @@
 use crate::{emitter::Emitter, keyboard::Keyboard, mouse::Mouse};
-use stardust_xr_molecules::fusion::client::{Client, FrameInfo, RootHandler};
+use stardust_xr_fusion::client::{Client, FrameInfo, RootHandler};
 
 pub struct Manifold {
 	keyboard: Emitter<Keyboard>,

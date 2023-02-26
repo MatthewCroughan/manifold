@@ -2,7 +2,7 @@ use crate::{keyboard::Keyboard, mouse::Mouse};
 use color_eyre::eyre::Result;
 use mint::Vector2;
 use softbuffer::GraphicsContext;
-use stardust_xr_molecules::fusion::client::Client;
+use stardust_xr_fusion::client::Client;
 use std::{mem::ManuallyDrop, sync::Arc};
 use winit::{
 	dpi::{LogicalPosition, PhysicalPosition, Size},
@@ -11,7 +11,7 @@ use winit::{
 		VirtualKeyCode, WindowEvent,
 	},
 	event_loop::EventLoop,
-	platform::unix::WindowExtUnix,
+	platform::x11::WindowExtX11,
 	window::{CursorGrabMode, Window, WindowBuilder},
 };
 use xcb::ffi::xcb_connection_t;
@@ -46,7 +46,6 @@ impl InputWindow {
 			.with_max_inner_size(size)
 			.with_inner_size(size)
 			.with_resizable(false)
-			.with_always_on_top(true)
 			.build(event_loop)?;
 
 		let keymap = match window.xcb_connection() {

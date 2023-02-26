@@ -1,14 +1,12 @@
 use mint::Vector3;
-use stardust_xr_molecules::{
-	fusion::{
-		client::FrameInfo,
-		core::values::Transform,
-		drawable::{Model, ResourceID},
-		fields::BoxField,
-		spatial::Spatial,
-	},
-	GrabData, Grabbable,
+use stardust_xr_fusion::{
+	client::FrameInfo,
+	core::values::Transform,
+	drawable::{Model, ResourceID},
+	fields::BoxField,
+	spatial::Spatial,
 };
+use stardust_xr_molecules::{GrabData, Grabbable};
 
 pub trait Emittable {
 	const SIZE: [f32; 3];
@@ -35,7 +33,10 @@ impl<E: Emittable> Emitter<E> {
 			spatial_parent,
 			Transform::default(),
 			&field,
-			GrabData { max_distance: 0.1 },
+			GrabData {
+				max_distance: 0.1,
+				..Default::default()
+			},
 		)
 		.unwrap();
 		grabbable
@@ -61,7 +62,7 @@ impl<E: Emittable> Emitter<E> {
 	}
 
 	pub fn frame(&mut self, info: FrameInfo) {
-		self.grabbable.update();
+		self.grabbable.update(&info);
 		self.contained.update(info);
 	}
 }
