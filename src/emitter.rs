@@ -29,7 +29,7 @@ impl<E: Emittable> Emitter<E> {
 	{
 		let field =
 			BoxField::create(spatial_parent, Transform::default(), Vector3::from(E::SIZE)).unwrap();
-		let grabbable = Grabbable::new(
+		let grabbable = Grabbable::create(
 			spatial_parent,
 			Transform::default(),
 			&field,
@@ -62,7 +62,7 @@ impl<E: Emittable> Emitter<E> {
 	}
 
 	pub fn frame(&mut self, info: FrameInfo) {
-		self.grabbable.update(&info);
+		let _ = self.grabbable.update(&info);
 		self.contained.update(info);
 	}
 }

@@ -1,10 +1,8 @@
 use color_eyre::eyre::Result;
 use input_window::InputWindow;
-#[cfg(feature = "dev")]
 use manifest_dir_macros::directory_relative_path;
 use manifold::Manifold;
 use stardust_xr_fusion::client::Client;
-use stardust_xr_molecules::resources;
 use std::thread;
 use tokio::{runtime::Handle, sync::oneshot};
 use winit::{event_loop::EventLoopBuilder, platform::x11::EventLoopBuilderExtX11};
@@ -19,7 +17,7 @@ pub mod mouse;
 async fn main() -> Result<()> {
 	color_eyre::install()?;
 	let (client, stardust_event_loop) = Client::connect_with_async_loop().await?;
-	resources::set_base_prefixes(&client);
+	client.set_base_prefixes(&[directory_relative_path!("res")]);
 
 	let tokio_handle = Handle::current();
 	let manifold = client.wrap_root(Manifold::new(&client))?;
